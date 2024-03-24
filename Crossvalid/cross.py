@@ -1,17 +1,30 @@
-from sklearn.datasets import load_breast_cancer
+import numpy as np
+from sklearn.datasets import load_diabetes
 from sklearn.model_selection import cross_val_score
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsRegressor
 
-data = load_breast_cancer()
-X = data.data
-y = data.target
+# Загрузка набора данных о пациентах с диабетом
+diabetes = load_diabetes()
+X = diabetes.data
+y = diabetes.target
 
-knn = KNeighborsClassifier(n_neighbors=7)
+# Определение диапазона значений гиперпараметра k
+k_values = list(range(1, 21))
 
-scores = cross_val_score(knn, X, y, cv=5, scoring='accuracy')
+# Список для сохранения средних оценок точности для каждого значения k
+mean_accuracies = []
 
-print("Точность для каждого фолда:")
-for i, score in enumerate(scores):
-    print(f"Фолд {i+1}: {score}")
+# Перебор всех значений k
+for k in k_values:
+    # Создание регрессора kNN
+    knn = KNeighborsRegressor(n_neighbors=k)
+    # Выполнение кросс-валидации и вычисление средней оценки точности
+    scores = cross_val_score(knn, X, y, cv=5, scoring='neg_mean_squared_error')
+    mean_accuracy = -np.mean(scores)  # обратим результат, так как scoring='neg_mean_squared_error'
+    mean_accuracies.append(mean_accuracy)
+    print(f"k = {k}, Среднее квадратичное отклонение = {mean_accuracy:.2f}")
 
-print("Средняя точность: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+# Вывод наилучшей оценки и соответствующего значения k
+best_accuracy = min(mean_accuracies)
+best_k = k_values[mean_accuracies.index(best_accuracy)]
+print(f"\nНаилучшее среднее квадратичное отклонение: {best_accuracy:.2f}, достигается при k = {best_k}.")
