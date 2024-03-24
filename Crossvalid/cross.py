@@ -8,7 +8,7 @@ y = data.target
 
 knn = KNeighborsClassifier(n_neighbors=7)
 
-scores = cross_val_score(knn, X, y, cv=10, scoring='accuracy')
+scores = cross_val_score(knn, X, y, cv=5, scoring='accuracy')
 
 print("Точность для каждого фолда:")
 for i, score in enumerate(scores):
